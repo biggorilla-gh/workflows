@@ -1,5 +1,4 @@
 import pandas
-import schemas
 import classify
 from sklearn import linear_model
 import numpy as np
