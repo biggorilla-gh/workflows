@@ -1,0 +1,23 @@
+#
+# Example of a pipeline for scraping content from coffee websites. 
+# This pipeline can be tailored for different websites.
+#
+
+
+#
+# scrap with EatersSpider
+#
+scrapy runspider EaterSpider.py -s OUTFILE="Eater-acquired.json"
+
+#
+# The above generates Eater-acquired.json. 
+#
+# Each url is extracted as one Json item {date:-, url:-, content:[ ]},
+# where content contains the paragraphs under <p> tags of the url.
+#
+
+#
+# Now remove html tags and newline characters from the content 
+#
+./extractRawText.py Eater-acquired.json Eater-clean.json
+
