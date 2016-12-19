@@ -1,1 +1,2 @@
-from flexmatcher import FlexMatcher
+__all__ = ["flexmatcher", "classify"]
+#from .flexmatcher import FlexMatcher
