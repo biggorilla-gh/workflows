@@ -46,12 +46,6 @@ class EaterSpider(scrapy.Spider):
         print("=== Error on {} ===".format(item['url']))
         yield item
 
-    # remove all html tags within the extracted paragraphs <p>
-    def cleanhtml(extracted):
-        cleanr = re.compile('<.*?>')
-        cleantext = re.sub(cleanr, '', extracted)
-        return cleantext
-
     def parse_cafe(self, response):
         item = response.meta['item']
         print("=== Retrieving {} ===".format(item['url']))
