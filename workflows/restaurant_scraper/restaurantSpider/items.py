@@ -9,7 +9,10 @@ import scrapy
 
 class RestaurantSpiderItem(scrapy.Item):
     # define the fields for your item here like:
-    # name = scrapy.Field()
+    # url: url of page being crawled
+    # title: title of the page
+    # date: date that the page is posted
+    # content: the crawled content
     url = scrapy.Field()
     title = scrapy.Field()
     date = scrapy.Field()
