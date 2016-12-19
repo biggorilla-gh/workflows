@@ -22,7 +22,7 @@ class RestaurantSpiderPipeline(object):
     @classmethod
     def from_crawler(cls, crawler):
         settings = crawler.settings
-        # get the specified filename
+        # get the specified filename to write to
         filename = settings.get("OUTFILE")
         pipeline = cls(filename)
         crawler.signals.connect(pipeline.spider_opened, signals.spider_opened)
@@ -30,6 +30,7 @@ class RestaurantSpiderPipeline(object):
         return pipeline
 
     def __init__(self, filename):
+        # open the file for writing
         self.file = open(filename, 'w+b')
     
     def spider_opened(self, spider):
