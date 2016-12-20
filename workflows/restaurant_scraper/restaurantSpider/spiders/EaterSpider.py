@@ -16,16 +16,22 @@ class EaterSpider(scrapy.Spider):
     allowed_domains = []
     start_urls = []
 
-    # url to page that contains reviews of highly rated restaurants
-    urlstr = "http://www.eater.com/reviews/rating/"
-    # we are scraping pages 1 to 25 of this url
+    # url to page. You can replace this with your site url
+    urlstr = "http://myexample.com"
+    # suppose we are scraping pages 1 to 25 of this url. add all urls
+    # to "start_urls"
     for i in xrange(1,25):
         start_urls.append(urlstr+str(i))
 
     print("=== Start URLs: {}".format(start_urls))
 
     def parse(self, response):
-        print "=== Starting to crawl Eater.com reviews === "
+        print "=== Starting to crawl the website === "
+        #
+        # The following are all hypothetical. We will extract the urls
+        # in each page (which we will scrap individually). We will
+        # also collect the corresponding titles and dates of the urls.
+        # 
         urls = response.selector.xpath('//h3/a[@data-analytics-link="review"]/@href').extract()
         titles = response.selector.xpath('//h3/a[@data-analytics-link="review"]/text()').extract()
         dates = response.selector.xpath('//div[@class="m-entry-box__body"]/p/span[@class="p-byline__time"]/text()').extract()
