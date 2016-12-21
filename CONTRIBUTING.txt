@@ -1,0 +1,23 @@
+### CONTRIBUTION TO BIGGORILLA
+------------------------------
+
+BigGorilla is an open-source framework for data integration
+and data preparation tasks. We encourage all researchers,
+engineers, professors and students who work on data preparation
+and data integration tasks to contribute to BigGorilla. To make
+sure your contribution can be easily deployed by others, the
+BigGorilla team will review and test your code. Please read the
+following instructions before submitting your contribution.
+
+* If you are submitting a sample workflow, you need to create a
+new folder under the "workflows" folder.
+* If you are submitting a python package make sure that you create
+a new folder with the name of your package under the "packages" folder.
+* Include a file titled "Authors.txt" inside your folder and mention
+the creators as well as any publications that should be cited for
+academic purposes.
+* If your submission uses large datasets, make sure to host them
+somewhere else and point to them in your submission (in a README file).
+* Note that by submitting your work, you are making it public for
+everyone and can be used for commercial as well as non-commercial and
+academic use.
