@@ -34,4 +34,4 @@ vals3 = [['rt', 'id', 'yr'],
          ['7.7', 'The Social Network', '2010']]
 header = vals3.pop(0)
 data3 = pd.DataFrame(vals3, columns=header)
-print fm.make_prediction(data3)
+print (fm.make_prediction(data3))
