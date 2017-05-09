@@ -23,7 +23,7 @@ test_requirements = [
 
 setup(
     name='flexmatcher',
-    version='0.6.0',
+    version='0.8.0',
     description="FlexMatcher is a schema matching package in Python which handles the problem of matching multiple schemas to a single mediated schema.",
     long_description=readme + '\n\n' + history,
     author="BigGorilla Team",
