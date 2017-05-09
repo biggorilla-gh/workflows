@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
-import pandas
 import flexmatcher.classify as clf
 from sklearn import linear_model
 import numpy as np
+import pandas
 
 class FlexMatcher:
 
