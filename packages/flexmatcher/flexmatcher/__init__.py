@@ -7,4 +7,4 @@ import flexmatcher.classify
 
 __author__ = """BigGorilla Team"""
 __email__ = 'thebiggorilla.team@gmail.com'
-__version__ = '0.1.0'
+__version__ = '0.8.0'
