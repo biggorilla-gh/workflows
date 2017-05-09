@@ -4,6 +4,8 @@ implements two classifiers (i.e., NaiveBayes and
 Tf-Idf).
 """
 from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 from abc import ABCMeta, abstractmethod
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
@@ -45,8 +47,8 @@ class NaiveBayes(Classifier):
         # each prediction is a tuple storing the probability of each class
         prediction_list = []
         for itt in range(folds):
-            start_index = itt * len(self.features) / folds
-            end_index = (itt + 1) * len(self.features) / folds if itt < folds - 1 else len(self.features)
+            start_index = itt * len(self.features) // folds
+            end_index = (itt + 1) * len(self.features) // folds if itt < folds - 1 else len(self.features)
             test_indices = range(start_index,end_index)
             training_features = np.delete(self.features, test_indices, axis=0)
             test_features = self.features[test_indices]
@@ -79,8 +81,8 @@ class Tf_Idf(Classifier):
         partial_clf = tree.DecisionTreeClassifier()
         prediction_list = []
         for itt in range(folds):
-            start_index = itt * len(self.features) / folds
-            end_index = (itt + 1) * len(self.features) / folds if itt < folds - 1 else len(self.features)
+            start_index = itt * len(self.features) // folds
+            end_index = (itt + 1) * len(self.features) // folds if itt < folds - 1 else len(self.features)
             test_indices = range(start_index,end_index)
             training_features = np.delete(self.features, test_indices, axis=0)
             test_features = self.features[test_indices]

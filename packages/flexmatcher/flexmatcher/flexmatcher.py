@@ -1,4 +1,6 @@
 from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 import pandas
 import flexmatcher.classify as clf
 from sklearn import linear_model
@@ -54,10 +56,8 @@ class FlexMatcher:
         data = data.fillna('NA')
         # predicting each column
         predicted_mapping = {}
-        (_, column_num) = data.shape
-        for column in range(column_num):
+        for column in list(data):
             column_dat = data[[column]]
-            column_name = column_dat.columns[0]
             column_dat.columns = ['value']
             scores = np.zeros((len(column_dat), len(self.weights)))
             for classifier_ind in range(len(self.classifier_list)):
@@ -69,5 +69,5 @@ class FlexMatcher:
                 scores = scores + raw_prediction
             flat_scores = scores.sum(axis=0) / len(column_dat)
             max_ind = flat_scores.argmax()
-            predicted_mapping[column_name] = self.class_list[max_ind]
+            predicted_mapping[column] = self.class_list[max_ind]
         return predicted_mapping
