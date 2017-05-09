@@ -3,9 +3,9 @@ This module defines an interface for classifiers, and
 implements two classifiers (i.e., NaiveBayes and
 Tf-Idf).
 """
+from __future__ import absolute_import
 from abc import ABCMeta, abstractmethod
 import numpy as np
-import sklearn
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import GaussianNB
 from sklearn import tree

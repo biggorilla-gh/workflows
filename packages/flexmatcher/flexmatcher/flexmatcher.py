@@ -1,3 +1,4 @@
+from __fututre__ import absolute_import
 import pandas
 import flexmatcher.classify as clf
 from sklearn import linear_model
