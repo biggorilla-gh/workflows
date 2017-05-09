@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from flexmatcher import FlexMatcher
+from flexmatcher.flexmatcher import FlexMatcher
+import flexmatcher.classify
 
 __author__ = """BigGorilla Team"""
 __email__ = 'thebiggorilla.team@gmail.com'
