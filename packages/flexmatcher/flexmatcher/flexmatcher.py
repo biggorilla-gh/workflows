@@ -1,5 +1,5 @@
 import pandas
-import classify
+import flexmatcher.classify as clf
 from sklearn import linear_model
 import numpy as np
 
@@ -22,8 +22,8 @@ class FlexMatcher:
         self.training_data = self.training_data.fillna('NA')
 
     def train(self):
-        classifierA = classify.NaiveBayes(self.training_data)
-        classifierB = classify.Tf_Idf(self.training_data)
+        classifierA = clf.NaiveBayes(self.training_data)
+        classifierB = clf.Tf_Idf(self.training_data)
         self.classifier_list = [classifierA, classifierB]
         self.prediction_list = [classifier.predict_training(3) for classifier in self.classifier_list]
         self.train_meta_learner()
