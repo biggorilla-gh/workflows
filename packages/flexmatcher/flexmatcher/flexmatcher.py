@@ -8,6 +8,10 @@ import pandas
 
 class FlexMatcher:
 
+    """Match a given schema to a mediated schema by learning from previous matchings.
+
+    """
+
     def __init__(self):
         pass
 
