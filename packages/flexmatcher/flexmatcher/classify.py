@@ -40,7 +40,7 @@ class NaiveBayes(Classifier):
         self.gnb = GaussianNB()
         self.gnb.fit(self.features, self.labels)
 
-    def predict_training(self, folds):
+    def predict_training(self, folds=5):
         # the module returns the performance of this classifier on the data
         test_gnb = GaussianNB()
         # creating a list of predictions
@@ -77,7 +77,7 @@ class Tf_Idf(Classifier):
         self.clf = tree.DecisionTreeClassifier()
         self.clf.fit(self.features, self.labels)
 
-    def predict_training(self, folds):
+    def predict_training(self, folds=5):
         partial_clf = tree.DecisionTreeClassifier()
         prediction_list = []
         for itt in range(folds):

@@ -8,48 +8,79 @@ import pandas
 
 class FlexMatcher:
 
-    """Match a given schema to a mediated schema by learning from previous matchings.
+    """Match a given schema to the mediated schema.
 
+    The FlexMatcher learns to match an input schema to a mediated schema.
+    The class considers panda dataframes as databases and their column names as
+    the schema. FlexMatcher learn to do schema matching by training on
+    instances of dataframes and how their columns are matched against the
+    mediated schema.
+
+    Attributes:
+        training_data (dataframe): Dataframe where with 3 columns. The name of
+            the column in the schema, the value under that column and the name
+            of the column in the mediated schema it was mapped to.
+        classifier_list (list): List of classifiers used in the training.
+        prediction_list (list): List of predictions on the training data
+            produced by each classifier.
+        weights (ndarray): A matrix where cell (i,j) captures how good the j-th
+            classifier is at predicting if a column should match the i-th
+            column (where columns are sorted by name) in the mediated schema.
+        columns ()
     """
 
     def __init__(self):
         pass
 
-    def create_training_data(self, dataframes_list, mappings_list, sample_size=100):
+    def create_training_data(self, dataframes, mappings, sample_size=100):
+        """Transform dataframes and mappings into training data.
+
+        The method uses the names of columns as well as the data under each
+        column as its training data. It also replaces missing values with 'NA'.
+
+        Args:
+            dataframes (list): List of dataframes to train on.
+            mapping (list): List of dictionaries mapping columns of dataframes
+                to columns in the mediated schema.
+        """
         training_data_list = []
-        for (dataframe, mapping) in zip(dataframes_list, mappings_list):
-            # get the sample
-            sampled_rows = dataframe.sample(min(sample_size, dataframe.shape[0]))
-            sampled_training_data = pandas.melt(sampled_rows, value_vars=list(sampled_rows.columns))
-            sampled_training_data.columns = ['name', 'value']
-            sampled_training_data['class'] = sampled_training_data.apply(lambda row: mapping[row['name']], axis=1)
-            training_data_list.append(sampled_training_data)
-        self.training_data = pandas.concat(training_data_list)
-        self.training_data.reset_index(drop=True, inplace=True)
-        self.training_data = self.training_data.fillna('NA')
+        for (datafr, mapping) in zip(dataframes, mappings):
+            sampled_rows = datafr.sample(min(sample_size, datafr.shape[0]))
+            sampled_data = pandas.melt(sampled_rows)
+            sampled_data.columns = ['name', 'value']
+            sampled_data['class'] = \
+                sampled_data.apply(lambda row: mapping[row['name']], axis=1)
+            training_data_list.append(sampled_data)
+        training_data = pandas.concat(training_data_list, ignore_index=True)
+        self.training_data = training_data.fillna('NA')
+        self.columns = list(set.union(*[set(x.values()) for x in mappings]))
 
     def train(self):
+        """Train each classifier and the meta-classifier."""
         classifierA = clf.NaiveBayes(self.training_data)
         classifierB = clf.Tf_Idf(self.training_data)
         self.classifier_list = [classifierA, classifierB]
-        self.prediction_list = [classifier.predict_training(3) for classifier in self.classifier_list]
+        self.prediction_list = \
+            [x.predict_training() for x in self.classifier_list]
         self.train_meta_learner()
 
     def train_meta_learner(self):
-        (_, class_num) = self.prediction_list[0].shape
-        self.class_list = sorted(list(self.training_data['class'].drop_duplicates()))
+        """Train the meta-classifier.
+
+        The data used for training the meta-classifier is the probability of
+        assigning each point to each column (or class) by each classifier. The
+        learned weights suggest how good each classifier is at predicting a
+        particular class."""
         coeff_list = []
-        for class_index in range(class_num):
-            class_name = self.class_list[class_index]
+        for class_ind, class_name in enumerate(self.columns):
             # preparing the dataset for linear regression
             regression_data = self.training_data[['class']].copy()
             regression_data['is_class'] = \
-                self.training_data.apply(lambda row: (row['class'] == class_name), axis=1)
+                np.where(self.training_data['class'] == class_name, True, False)
             # adding the prediction probability from classifiers
-            for classifier_index in range(len(self.prediction_list)):
-                prediction = self.prediction_list[classifier_index]
-                regression_data['classifer' + str(classifier_index)] = \
-                    prediction[:,class_index]
+            for classifier_ind, prediction in enumerate(self.prediction_list):
+                regression_data['classifer' + str(classifier_ind)] = \
+                    prediction[:,class_ind]
             # setting up the linear regression
             stacker = linear_model.LinearRegression()
             stacker.fit(regression_data.iloc[:,2:], regression_data['is_class'])
@@ -57,21 +88,27 @@ class FlexMatcher:
         self.weights = np.concatenate(tuple(coeff_list))
 
     def make_prediction(self, data):
+        """Map the schema of a given dataframe to the column of mediated schema.
+
+        The procedure runs each classifier and then uses the weights (learned
+        by the meta-trainer) to combine the prediction of each classifier.
+        """
         data = data.fillna('NA')
         # predicting each column
         predicted_mapping = {}
         for column in list(data):
             column_dat = data[[column]]
             column_dat.columns = ['value']
-            scores = np.zeros((len(column_dat), len(self.weights)))
-            for classifier_ind in range(len(self.classifier_list)):
-                classifier = self.classifier_list[classifier_ind]
-                raw_prediction = classifier.predict(column_dat)
+            scores = np.zeros((len(column_dat), len(self.columns)))
+            for clf_ind, clf_inst in enumerate(self.classifier_list):
+                raw_prediction = clf_inst.predict(column_dat)
                 # applying the weights to each class in the raw prediction
-                for class_ind in range(len(self.weights)):
-                    raw_prediction[:,class_ind] = raw_prediction[:,class_ind] * self.weights[class_ind, classifier_ind]
+                for class_ind in range(len(self.columns)):
+                    raw_prediction[:,class_ind] = \
+                        (raw_prediction[:,class_ind] *
+                         self.weights[class_ind, clf_ind])
                 scores = scores + raw_prediction
             flat_scores = scores.sum(axis=0) / len(column_dat)
             max_ind = flat_scores.argmax()
-            predicted_mapping[column] = self.class_list[max_ind]
+            predicted_mapping[column] = self.columns[max_ind]
         return predicted_mapping
