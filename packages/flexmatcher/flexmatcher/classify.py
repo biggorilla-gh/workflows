@@ -1,8 +1,15 @@
 """
+Implement classifier for FlexMatcher.
+
 This module defines an interface for classifiers, and
 implements two classifiers (i.e., NaiveBayes and
 Tf-Idf).
+
+Todo:
+    * Implement more relevant classifiers.
+    * Implement simple rules (e.g., does data match a phone number?).
 """
+
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division

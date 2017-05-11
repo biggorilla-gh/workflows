@@ -1,3 +1,15 @@
+"""
+Implement FlexMatcher.
+
+This module is the main module of the FlexMatcher package and implements the
+FlexMatcher class.
+
+Todo:
+    * Extend the module to work with and without data or column names.
+    * Allow users to add/remove classifiers.
+    * Combine modules (i.e., create_training_data and training functions).
+    * Resolve the warning related to loading linear regression.
+"""
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
