@@ -17,6 +17,7 @@ import flexmatcher.classify as clf
 from sklearn import linear_model
 import numpy as np
 import pandas
+import warnings
 
 class FlexMatcher:
 
@@ -65,13 +66,20 @@ class FlexMatcher:
             training_data_list.append(sampled_data)
         training_data = pandas.concat(training_data_list, ignore_index=True)
         self.training_data = training_data.fillna('NA')
-        self.columns = list(set.union(*[set(x.values()) for x in mappings]))
+        self.columns = \
+            sorted(list(set.union(*[set(x.values()) for x in mappings])))
 
     def train(self):
         """Train each classifier and the meta-classifier."""
-        classifierA = clf.NaiveBayes(self.training_data)
-        classifierB = clf.Tf_Idf(self.training_data)
-        self.classifier_list = [classifierA, classifierB]
+        word_count_clf = clf.NGramClassifier(self.training_data)
+        biword_count_clf = clf.NGramClassifier(self.training_data,
+                                               ngram_range=(2,2))
+        char_count_clf = clf.NGramClassifier(self.training_data,
+                                             analyzer='char',
+                                             ngram_range=(3,6))
+        char_dist_clf = clf.CharDistClassifier(self.training_data)
+        self.classifier_list = [word_count_clf, biword_count_clf,
+                                char_count_clf, char_dist_clf]
         self.prediction_list = \
             [x.predict_training() for x in self.classifier_list]
         self.train_meta_learner()
@@ -83,6 +91,10 @@ class FlexMatcher:
         assigning each point to each column (or class) by each classifier. The
         learned weights suggest how good each classifier is at predicting a
         particular class."""
+        # suppressing a warning from scipy that gelsd is broken and gless is
+        # being used instead.
+        warnings.filterwarnings(action="ignore", module="scipy",
+                                message="^internal gelsd")
         coeff_list = []
         for class_ind, class_name in enumerate(self.columns):
             # preparing the dataset for linear regression
