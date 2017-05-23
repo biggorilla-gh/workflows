@@ -3,7 +3,7 @@ import unittest
 
 import flexmatcher
 
-class PredictionTest(unittest.TestCase):
+class MovieTest(unittest.TestCase):
 
     def setUp(self):
         # creating the first dataset
