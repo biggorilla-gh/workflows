@@ -12,18 +12,18 @@ with open('HISTORY.rst') as history_file:
 requirements = [
     'pandas',
     'scipy',
-    'sklearn>=0.18.0'
+    'scikit-learn>=0.18'
 ]
 
 test_requirements = [
     'pandas',
     'scipy',
-    'sklearn'
+    'scikit-learn>=0.18'
 ]
 
 setup(
     name='flexmatcher',
-    version='0.9.1',
+    version='0.9.4',
     description="FlexMatcher is a schema matching package in Python which handles the problem of matching multiple schemas to a single mediated schema.",
     long_description=readme + '\n\n' + history,
     author="BigGorilla Team",
