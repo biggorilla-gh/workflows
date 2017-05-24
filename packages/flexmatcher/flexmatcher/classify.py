@@ -18,6 +18,7 @@ from abc import ABCMeta, abstractmethod
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import HashingVectorizer
+from sklearn.model_selection import StratifiedKFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn import tree
 
@@ -57,6 +58,7 @@ class NGramClassifier(Classifier):
         vectorizer (object): Vectorizer for transforming text to features. It
         will be either of type CountVectorizer or HashingVectorizer.
         clf (DecisionTreeClassifier): The classifier instance.
+        num_classes (int): Number of classes/columns to match to
     """
 
     def __init__(self, data, ngram_range=(1,1), analyzer='word', count=True):
@@ -72,6 +74,7 @@ class NGramClassifier(Classifier):
             versus a binary value encoding if the n-gram is present or not.
         """
         self.labels = np.array(data['class'])
+        self.num_classes = len(data['class'].unique())
         values = list(data['value'])
         # checking what type of vectorize to create
         if count:
@@ -92,21 +95,17 @@ class NGramClassifier(Classifier):
             folds (int): Number of folds used for prediction on training data.
         """
         partial_clf = GaussianNB()
-        prediction_list = []
-        for itt in range(folds):
-            # finding the starting and ending index of test data
-            start_index = itt * len(self.features) // folds
-            end_index = (itt + 1) * len(self.features) // folds
-            if itt == folds - 1: end_index = len(self.features)
-            test_indices = range(start_index,end_index)
+        prediction = np.zeros((len(self.features), self.num_classes))
+        skf = StratifiedKFold(n_splits=folds)
+        for train_index, test_index in skf.split(self.features, self.labels):
             # prepare the training and test data
-            training_features = np.delete(self.features, test_indices, axis=0)
-            test_features = self.features[test_indices]
-            training_labels = np.delete(self.labels, test_indices, axis=0)
+            training_features = self.features[train_index]
+            test_features = self.features[test_index]
+            training_labels = self.labels[train_index]
             # fitting the model and predicting
             partial_clf.fit(training_features, training_labels)
-            prediction_list.append(partial_clf.predict_proba(test_features))
-        return np.concatenate(tuple(prediction_list))
+            prediction[test_index] = partial_clf.predict_proba(test_features)
+        return prediction
 
     def predict(self, data):
         """Predict the class for a new given data.
@@ -132,6 +131,7 @@ class CharDistClassifier(Classifier):
         labels (ndarray): Vector storing the labels of each data-point.
         features (ndarray): Matrix storing the extracting features.
         clf (DecisionTreeClassifier): The classifier instance.
+        num_classes (int): Number of classes/columns to match to
     """
 
     def __init__(self, data):
@@ -141,6 +141,7 @@ class CharDistClassifier(Classifier):
             data (dataframe): Training data (values and their correct column).
         """
         self.labels = np.array(data['class'])
+        self.num_classes = len(data['class'].unique())
         # populating the features dataframe
         feat_df = data[['value']].copy()
         feat_df['length'] = feat_df['value'].apply(lambda val: len(val))
@@ -168,21 +169,17 @@ class CharDistClassifier(Classifier):
             folds (int): Number of folds used for prediction on training data.
         """
         partial_clf = tree.DecisionTreeClassifier()
-        prediction_list = []
-        for itt in range(folds):
-            # finding the starting and ending index of test data
-            start_index = itt * len(self.features) // folds
-            end_index = (itt + 1) * len(self.features) // folds
-            if itt == folds - 1: end_index = len(self.features)
-            test_indices = range(start_index,end_index)
+        prediction = np.zeros((len(self.features), self.num_classes))
+        skf = StratifiedKFold(n_splits=folds)
+        for train_index, test_index in skf.split(self.features, self.labels):
             # prepare the training and test data
-            training_features = np.delete(self.features, test_indices, axis=0)
-            test_features = self.features[test_indices]
-            training_labels = np.delete(self.labels, test_indices, axis=0)
+            training_features = self.features[train_index]
+            test_features = self.features[test_index]
+            training_labels = self.labels[train_index]
             # fitting the model and predicting
             partial_clf.fit(training_features, training_labels)
-            prediction_list.append(partial_clf.predict_proba(test_features))
-        return np.concatenate(tuple(prediction_list))
+            prediction[test_index] = partial_clf.predict_proba(test_features)
+        return prediction
 
     def predict(self, data):
         """Predict the class for a new given data.
@@ -193,15 +190,15 @@ class CharDistClassifier(Classifier):
         feat_df = data[['value']].copy()
         feat_df['length'] = feat_df['value'].apply(lambda val: len(val))
         feat_df['digit_frac'] = feat_df['value'].apply(
-            lambda val: sum(char.isdigit() for char in val))
+            lambda val: sum(char.isdigit() for char in val) / len(val))
         feat_df['digit_num'] = feat_df['value'].apply(
             lambda val: sum(char.isdigit() for char in val))
         feat_df['alpha_frac'] = feat_df['value'].apply(
-            lambda val: sum(char.isalpha() for char in val))
+            lambda val: sum(char.isalpha() for char in val) / len(val))
         feat_df['alpha_num'] = feat_df['value'].apply(
             lambda val: sum(char.isalpha() for char in val))
         feat_df['space_frac'] = feat_df['value'].apply(
-            lambda val: sum(char.isspace() for char in val))
+            lambda val: sum(char.isspace() for char in val) / len(val))
         feat_df['space_num'] = feat_df['value'].apply(
             lambda val: sum(char.isspace() for char in val))
         features = feat_df.ix[:,1:].as_matrix()
