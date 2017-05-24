@@ -12,7 +12,7 @@ with open('HISTORY.rst') as history_file:
 requirements = [
     'pandas',
     'scipy',
-    'sklearn'
+    'sklearn>=0.18.0'
 ]
 
 test_requirements = [
